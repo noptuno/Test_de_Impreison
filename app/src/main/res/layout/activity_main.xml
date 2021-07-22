@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgroundsr"
+    tools:context=".MainActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/btn_bluetooth"
+                android:layout_width="200dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/btn_fondo_color"
+                android:text="Select Bluetooth"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/txtbluetooth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Bluettoh Seleccionado"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/btnPDF"
+                android:layout_width="200dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="50dp"
+                android:background="@drawable/btn_fondo_color"
+                android:text="SELECT pdf"
+                android:textColor="@color/white"
+                android:visibility="visible" />
+
+            <TextView
+                android:id="@+id/txtpathpdff"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="5dp"
+                android:text="pdf path"
+                android:textColor="@color/white"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/btngondolatsc"
+                android:layout_width="200dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="50dp"
+                android:background="@drawable/btn_fondo_color2"
+                android:text="Tag Gondola Alpha3"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/btnapiproductos"
+                android:layout_width="200dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/btn_fondo_color3"
+                android:text="Api Productos" />
+
+            <Button
+                android:id="@+id/btn_tag_sml300"
+                android:layout_width="200dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="50dp"
+                android:background="@drawable/btn_fondo_color4"
+                android:text="Tag Gondola Star SM L300"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/btn_pdf_r410"
+                android:layout_width="200dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="50dp"
+                android:background="@drawable/btn_fondo_color4"
+                android:text="Pdf Bixolon R410"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/btn_pdf_zebra_alpha"
+                android:layout_width="200dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="50dp"
+                android:background="@drawable/btn_fondo_color4"
+                android:text="PDF CPCL A  ALPHA3"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/btn_bmp_tsc"
+                android:layout_width="200dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="50dp"
+                android:background="@drawable/btn_fondo_color4"
+                android:text="PDF TSC ALPHA3"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/btnMPD31"
+                android:layout_width="200dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="50dp"
+                android:background="@drawable/btn_fondo_color4"
+                android:text="EJEMPLO ESCPOS MPD31"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/btndpl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="DPL Etiqueta pdf"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/btnpax"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="PrintPax"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/btnescpos2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ESCPOS MPD31"
+                android:visibility="visible" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
