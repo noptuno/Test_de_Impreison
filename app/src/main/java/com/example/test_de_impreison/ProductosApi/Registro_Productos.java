@@ -50,14 +50,13 @@ public class Registro_Productos extends AppCompatActivity {
 
                         } catch (Exception e) {
                             e.printStackTrace();
-
                         }
                     }
                 };
                 thread.start();
-
             }
         });
+
 
         Eliminar = findViewById(R.id.btn_eliminar);
         Eliminar.setOnClickListener(new View.OnClickListener() {

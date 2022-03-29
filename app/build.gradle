@@ -2,14 +2,13 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "30.0.2"
 
     defaultConfig {
         applicationId "com.example.test_de_impreison"
         minSdkVersion 16
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -34,17 +33,19 @@ android {
 
     productFlavors {
     }
-
     packagingOptions {
-        exclude 'META-INF/REFACTORINGS.XML'
+        resources {
+            excludes += ['META-INF/REFACTORINGS.XML']
+        }
     }
+
 }
 
 dependencies {
 
     implementation fileTree(include: ['*.aar'], dir: 'libs')
     implementation files('libs\\NeptuneLiteApi_V3.23.00_20210409.jar')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     implementation files('libs/printer_library.jar')

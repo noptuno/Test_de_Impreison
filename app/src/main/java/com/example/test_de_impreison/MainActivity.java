@@ -147,14 +147,18 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         pedir_permiso_escritura();
+
 
         mProgressDialog = new ProgressDialog(MainActivity.this);
         mProgressDialog.setMessage("Communicating...");
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         mProgressDialog.setCancelable(false);
 
+
         long start = System.currentTimeMillis();
+
 
         try {
             idal = NeptuneLiteUser.getInstance().getDal(getApplicationContext());
@@ -458,7 +462,10 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
         paramDPL = new ParametersDPL();
         printData = new byte[]{0};
 
+
+
         try {
+
             docDPL.writePDF(pathpdf, 834, 0, 0);
             printData = docDPL.getDocumentData();
 
@@ -502,7 +509,7 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
                 }
                 EnableDialog(false, "Enviando Documento...",true);
             }
-        });
+        }).start();
     }
 
     private void pedir_permiso_escritura() {
@@ -572,7 +579,7 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
 
         try {
 
-            mBitmap = generateImageFromPdf(pathpdf, 0, 576);
+            mBitmap = generateImageFromPdf(pathpdf, 0, 630);
             heigth_calculator = (int) (mBitmap.getHeight()/8);
             wigth_calculator = (int) (mBitmap.getWidth()/8);
 
@@ -597,7 +604,7 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
                             EnableDialog(true, "Enviando Documento...",true);
                             TscDll.openport(m_printerMAC);
                             TscDll.downloadbmp("temp2.BMP");
-                            TscDll.setup(wigth_calculator, heigth_calculator, 4, 0, 0, 0, 0);
+                            TscDll.setup(wigth_calculator, heigth_calculator, 4, 10, 0, 0, 0);
                             TscDll.clearbuffer();
                             TscDll.sendcommand("PUTBMP 10,10,\"temp2.BMP\"\n");
                             TscDll.printlabel(1, 1);
