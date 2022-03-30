@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,11 +15,13 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.hardware.usb.UsbDevice;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.View;
@@ -26,6 +29,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bixolon.commonlib.emul.image.LabelImage;
+import com.bixolon.labelprinter.BixolonLabelPrinter;
 import com.bxl.config.editor.BXLConfigLoader;
 
 import com.example.test_de_impreison.ProductosApi.Registro_Productos;
@@ -68,6 +73,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
+import java.util.Set;
 
 import honeywell.connection.ConnectionBase;
 import honeywell.connection.Connection_Bluetooth;
@@ -101,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
     private String m_sucursal, pathpdf;
     private TextView txtsucursal,txtpathpdf;
     private String password;
-    private Button btnbluetooth, btnpaxprint, apiprodcutos;
+    private Button btnbluetooth, btnpaxprint, apiprodcutos,btnbixolon;
     private Button btnTagSml300, btnPdfZebraAlpha, btnBmpTsc, btnbuscarpdf,btn_MPD31,btn_gondolatsc, btndpletiqueta,btnescpos
             ;
     private Button btnPdfR410;
@@ -192,6 +198,19 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, TagGondolaTsc.class);
                 startActivity(intent);
+            }
+        });
+
+
+        btnbixolon =findViewById(R.id.btnBixolon);
+        btnbixolon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                printBixolon();
+
+
             }
         });
 
@@ -628,6 +647,152 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
         }
 
     }
+
+
+    private final Handler mHandlerer = new Handler()
+    {
+        @Override
+        public void handleMessage(Message msg)
+        {
+            switch (msg.what)
+            {
+                case BixolonLabelPrinter.MESSAGE_STATE_CHANGE:
+                    switch (msg.arg1)
+                    {
+                        case BixolonLabelPrinter.STATE_CONNECTED:
+
+                            break;
+
+                        case BixolonLabelPrinter.STATE_CONNECTING:
+
+                            break;
+
+                        case BixolonLabelPrinter.STATE_NONE:
+
+                            invalidateOptionsMenu();
+                            break;
+                    }
+                    break;
+
+                case BixolonLabelPrinter.MESSAGE_READ:
+                    //MainActivity.this.dispatchMessage(msg);
+                    break;
+
+                case BixolonLabelPrinter.MESSAGE_DEVICE_NAME:
+                   // mConnectedDeviceName = msg.getData().getString(BixolonLabelPrinter.DEVICE_NAME);
+                 //   Toast.makeText(getApplicationContext(), mConnectedDeviceName, Toast.LENGTH_LONG).show();
+                    break;
+
+                case BixolonLabelPrinter.MESSAGE_TOAST:
+                   // mListView.setEnabled(false);
+                    Toast.makeText(getApplicationContext(), msg.getData().getString(BixolonLabelPrinter.TOAST), Toast.LENGTH_SHORT).show();
+                    break;
+
+                case BixolonLabelPrinter.MESSAGE_LOG:
+                    Toast.makeText(getApplicationContext(), msg.getData().getString(BixolonLabelPrinter.LOG), Toast.LENGTH_SHORT).show();
+                    break;
+
+                case BixolonLabelPrinter.MESSAGE_BLUETOOTH_DEVICE_SET:
+                    if(msg.obj == null)
+                    {
+                        Toast.makeText(getApplicationContext(), "No paired device", Toast.LENGTH_SHORT).show();
+                    }
+                    else
+                    {
+                      //  DialogManager.showBluetoothDialog(MainActivity.this, (Set<BluetoothDevice>) msg.obj);
+                    }
+                    break;
+
+                case BixolonLabelPrinter.MESSAGE_USB_DEVICE_SET:
+                    if(msg.obj == null)
+                    {
+                        Toast.makeText(getApplicationContext(), "No connected device", Toast.LENGTH_SHORT).show();
+                    }
+                    else
+                    {
+                    //    DialogManager.showUsbDialog(MainActivity.this, (Set<UsbDevice>) msg.obj, mUsbReceiver);
+                    }
+                    break;
+
+                case BixolonLabelPrinter.MESSAGE_NETWORK_DEVICE_SET:
+                    if(msg.obj == null)
+                    {
+                        Toast.makeText(getApplicationContext(), "No connectable device", Toast.LENGTH_SHORT).show();
+                    }
+                   // DialogManager.showNetworkDialog(MainActivity.this, msg.obj.toString());
+                    break;
+
+            }
+        }
+    };
+
+
+    private void printBixolon(){
+
+
+       Bitmap mBitmap = generateImageFromPdf(pathpdf, 0, 500);
+        if (mBitmap != null) {
+
+            byte[] bitmapData = convertTo1BPP(mBitmap, 128);
+           final Bitmap bitt = BitmapFactory.decodeByteArray(bitmapData, 0, bitmapData.length);
+
+            BixolonLabelPrinter mBixolonLabelPrinter;
+            mBixolonLabelPrinter = new BixolonLabelPrinter(this, mHandlerer, Looper.getMainLooper());
+
+            LabelImage image = new LabelImage();
+            if (image.Load(bitt)) {
+              //  image.MakeLD(horizontalStartPosition, verticalStartPosition, width, dithering ? 1 : 0, 0, level, 30);
+                printdatos = image.PopAll();
+
+            }
+
+          //  mBixolonLabelPrinter.drawBitmap(bitt, horizontalStartPosition, verticalStartPosition, width, level, dithering);
+
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        EnableDialog(true, "Enviando Documento...",true);
+                        Looper.prepare();
+                        conn = Connection_Bluetooth.createClient(m_printerMAC, true);
+                        if (!conn.getIsOpen()) {
+                            if (conn.open()) {
+                                int bytesWritten = 0;
+                                int bytesToWrite = 1024;
+                                int totalBytes = printdatos.length;
+                                int remainingBytes = totalBytes;
+                                while (bytesWritten < totalBytes) {
+                                    if (remainingBytes < bytesToWrite)
+                                        bytesToWrite = remainingBytes;
+                                    //Send data, 1024 bytes at a time until all data sent
+                                    conn.write(printdatos, bytesWritten, bytesToWrite);
+                                    bytesWritten += bytesToWrite;
+                                    remainingBytes = remainingBytes - bytesToWrite;
+                                }
+                                EnableDialog(false, "Enviando Documento...",true);
+                                conn.close();
+                            }
+                        }
+
+                    } catch (PrinterDevException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    EnableDialog(false, "Enviando Documento...",true);
+
+                }
+            }).start();
+
+        }
+
+        }
+
+
+
 
     private void PrintPdfZebraAlpha() {
 
