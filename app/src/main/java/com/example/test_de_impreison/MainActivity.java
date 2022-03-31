@@ -29,8 +29,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bixolon.commonlib.BXLCommonConst;
+import com.bixolon.commonlib.connectivity.ConnectivityManager;
 import com.bixolon.commonlib.emul.image.LabelImage;
 import com.bixolon.labelprinter.BixolonLabelPrinter;
+import com.bixolon.labelprinter.service.ServiceManager;
 import com.bxl.config.editor.BXLConfigLoader;
 
 import com.example.test_de_impreison.ProductosApi.Registro_Productos;
@@ -208,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
             public void onClick(View v) {
 
 
-                printBixolon();
+                printBixolon2();
 
 
             }
@@ -660,15 +663,15 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
                     switch (msg.arg1)
                     {
                         case BixolonLabelPrinter.STATE_CONNECTED:
-
+                            Toast.makeText(getApplicationContext(), "conectado", Toast.LENGTH_SHORT).show();
                             break;
 
                         case BixolonLabelPrinter.STATE_CONNECTING:
-
+                            Toast.makeText(getApplicationContext(), "conectando", Toast.LENGTH_SHORT).show();
                             break;
 
                         case BixolonLabelPrinter.STATE_NONE:
-
+                            Toast.makeText(getApplicationContext(), "none", Toast.LENGTH_SHORT).show();
                             invalidateOptionsMenu();
                             break;
                     }
@@ -681,6 +684,7 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
                 case BixolonLabelPrinter.MESSAGE_DEVICE_NAME:
                    // mConnectedDeviceName = msg.getData().getString(BixolonLabelPrinter.DEVICE_NAME);
                  //   Toast.makeText(getApplicationContext(), mConnectedDeviceName, Toast.LENGTH_LONG).show();
+
                     break;
 
                 case BixolonLabelPrinter.MESSAGE_TOAST:
@@ -727,6 +731,62 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
     };
 
 
+    private ServiceManager mServiceManager;
+    private void printBixolon2(){
+
+        Bitmap mBitmap = generateImageFromPdf(pathpdf, 0, 500);
+        byte[] bitmapData = convertTo1BPP(mBitmap, 128);
+        final Bitmap bitt = BitmapFactory.decodeByteArray(bitmapData, 0, bitmapData.length);
+
+        mServiceManager = new ServiceManager(this, mHandlerer,  Looper.getMainLooper());
+
+
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    EnableDialog(true, "Enviando Documento...",true);
+
+
+                    if (bitt != null) {
+                        LabelImage image = new LabelImage();
+                        if (image.Load(bitt)) {
+                            image.MakeLD(0, 0, 500,  0, 0, 50, 30);
+
+                            //Looper.prepare();
+
+                            mServiceManager.connect(m_printerMAC, BXLCommonConst._PORT_BLUETOOTH);
+                            mServiceManager.Write(image.PopAll());
+                            mServiceManager.executeCommand("P" + 1 + "," + 1, false);
+
+                        }
+                    }
+
+
+
+                    EnableDialog(false, "Enviando terminando...",false);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    EnableDialog(false, "Enviando terminando...",false);
+                }
+            }
+        };
+
+        thread.start();
+
+
+
+
+
+
+
+
+
+
+    }
+
+
     private void printBixolon(){
 
 
@@ -736,56 +796,46 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
             byte[] bitmapData = convertTo1BPP(mBitmap, 128);
            final Bitmap bitt = BitmapFactory.decodeByteArray(bitmapData, 0, bitmapData.length);
 
-            BixolonLabelPrinter mBixolonLabelPrinter;
-            mBixolonLabelPrinter = new BixolonLabelPrinter(this, mHandlerer, Looper.getMainLooper());
+           // BixolonLabelPrinter mBixolonLabelPrinter;
+           // mBixolonLabelPrinter = new BixolonLabelPrinter(this, mHandlerer, Looper.getMainLooper());
 
             LabelImage image = new LabelImage();
+
+            ConnectivityManager connectivityManager = null;
+
             if (image.Load(bitt)) {
               //  image.MakeLD(horizontalStartPosition, verticalStartPosition, width, dithering ? 1 : 0, 0, level, 30);
-                printdatos = image.PopAll();
+                image.MakeLD(0, 0, 500, 0, 0, 50, 30);
 
+
+               connectivityManager.write( image.PopAll());
+                byte[] readBuffer =  image.PopAll();
+               // printdatos = image.PopAll();
             }
 
           //  mBixolonLabelPrinter.drawBitmap(bitt, horizontalStartPosition, verticalStartPosition, width, level, dithering);
 
 
-            new Thread(new Runnable() {
+            Thread thread = new Thread() {
                 @Override
                 public void run() {
                     try {
                         EnableDialog(true, "Enviando Documento...",true);
-                        Looper.prepare();
-                        conn = Connection_Bluetooth.createClient(m_printerMAC, true);
-                        if (!conn.getIsOpen()) {
-                            if (conn.open()) {
-                                int bytesWritten = 0;
-                                int bytesToWrite = 1024;
-                                int totalBytes = printdatos.length;
-                                int remainingBytes = totalBytes;
-                                while (bytesWritten < totalBytes) {
-                                    if (remainingBytes < bytesToWrite)
-                                        bytesToWrite = remainingBytes;
-                                    //Send data, 1024 bytes at a time until all data sent
-                                    conn.write(printdatos, bytesWritten, bytesToWrite);
-                                    bytesWritten += bytesToWrite;
-                                    remainingBytes = remainingBytes - bytesToWrite;
-                                }
-                                EnableDialog(false, "Enviando Documento...",true);
-                                conn.close();
-                            }
-                        }
 
-                    } catch (PrinterDevException e) {
-                        e.printStackTrace();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+
+
+
+
+                        EnableDialog(false, "Enviando terminando...",false);
+
                     } catch (Exception e) {
                         e.printStackTrace();
+                        EnableDialog(false, "Enviando terminando...",false);
                     }
-                    EnableDialog(false, "Enviando Documento...",true);
-
                 }
-            }).start();
+            };
+
+            thread.start();
 
         }
 
