@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import com.bixolon.commonlib.BXLCommonConst;
 import com.bixolon.commonlib.connectivity.ConnectivityManager;
+import com.bixolon.commonlib.emul.SLCSEmul;
 import com.bixolon.commonlib.emul.image.LabelImage;
 import com.bixolon.labelprinter.BixolonLabelPrinter;
 import com.bixolon.labelprinter.service.ServiceManager;
@@ -655,13 +656,10 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
     private final Handler mHandlerer = new Handler()
     {
         @Override
-        public void handleMessage(Message msg)
-        {
-            switch (msg.what)
-            {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
                 case BixolonLabelPrinter.MESSAGE_STATE_CHANGE:
-                    switch (msg.arg1)
-                    {
+                    switch (msg.arg1) {
                         case BixolonLabelPrinter.STATE_CONNECTED:
                             Toast.makeText(getApplicationContext(), "conectado", Toast.LENGTH_SHORT).show();
                             break;
@@ -671,61 +669,11 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
                             break;
 
                         case BixolonLabelPrinter.STATE_NONE:
-                            Toast.makeText(getApplicationContext(), "none", Toast.LENGTH_SHORT).show();
-                            invalidateOptionsMenu();
+                            Toast.makeText(getApplicationContext(), "error conexion", Toast.LENGTH_SHORT).show();
+
                             break;
                     }
                     break;
-
-                case BixolonLabelPrinter.MESSAGE_READ:
-                    //MainActivity.this.dispatchMessage(msg);
-                    break;
-
-                case BixolonLabelPrinter.MESSAGE_DEVICE_NAME:
-                   // mConnectedDeviceName = msg.getData().getString(BixolonLabelPrinter.DEVICE_NAME);
-                 //   Toast.makeText(getApplicationContext(), mConnectedDeviceName, Toast.LENGTH_LONG).show();
-
-                    break;
-
-                case BixolonLabelPrinter.MESSAGE_TOAST:
-                   // mListView.setEnabled(false);
-                    Toast.makeText(getApplicationContext(), msg.getData().getString(BixolonLabelPrinter.TOAST), Toast.LENGTH_SHORT).show();
-                    break;
-
-                case BixolonLabelPrinter.MESSAGE_LOG:
-                    Toast.makeText(getApplicationContext(), msg.getData().getString(BixolonLabelPrinter.LOG), Toast.LENGTH_SHORT).show();
-                    break;
-
-                case BixolonLabelPrinter.MESSAGE_BLUETOOTH_DEVICE_SET:
-                    if(msg.obj == null)
-                    {
-                        Toast.makeText(getApplicationContext(), "No paired device", Toast.LENGTH_SHORT).show();
-                    }
-                    else
-                    {
-                      //  DialogManager.showBluetoothDialog(MainActivity.this, (Set<BluetoothDevice>) msg.obj);
-                    }
-                    break;
-
-                case BixolonLabelPrinter.MESSAGE_USB_DEVICE_SET:
-                    if(msg.obj == null)
-                    {
-                        Toast.makeText(getApplicationContext(), "No connected device", Toast.LENGTH_SHORT).show();
-                    }
-                    else
-                    {
-                    //    DialogManager.showUsbDialog(MainActivity.this, (Set<UsbDevice>) msg.obj, mUsbReceiver);
-                    }
-                    break;
-
-                case BixolonLabelPrinter.MESSAGE_NETWORK_DEVICE_SET:
-                    if(msg.obj == null)
-                    {
-                        Toast.makeText(getApplicationContext(), "No connectable device", Toast.LENGTH_SHORT).show();
-                    }
-                   // DialogManager.showNetworkDialog(MainActivity.this, msg.obj.toString());
-                    break;
-
             }
         }
     };
@@ -734,11 +682,21 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
     private ServiceManager mServiceManager;
     private void printBixolon2(){
 
-        Bitmap mBitmap = generateImageFromPdf(pathpdf, 0, 500);
+       Bitmap mBitmap = generateImageFromPdf(pathpdf, 0, 576);
+
+/*
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inJustDecodeBounds = false;
+        opts.inSampleSize = 1;
+        opts.inPreferredConfig = Bitmap.Config.RGB_565;
+        mBitmap = BitmapFactory.decodeFile(pathpdf, opts);
+*/
+
         byte[] bitmapData = convertTo1BPP(mBitmap, 128);
         final Bitmap bitt = BitmapFactory.decodeByteArray(bitmapData, 0, bitmapData.length);
 
-        mServiceManager = new ServiceManager(this, mHandlerer,  Looper.getMainLooper());
+
+        mServiceManager = new ServiceManager(getApplicationContext(), mHandlerer,  Looper.getMainLooper());
 
 
         Thread thread = new Thread() {
@@ -747,22 +705,21 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
                 try {
                     EnableDialog(true, "Enviando Documento...",true);
 
-
                     if (bitt != null) {
                         LabelImage image = new LabelImage();
                         if (image.Load(bitt)) {
-                            image.MakeLD(0, 0, 500,  0, 0, 50, 30);
+                            image.MakeLD(0, 0, 576,  0, 0, 50, 30);
 
                             //Looper.prepare();
 
                             mServiceManager.connect(m_printerMAC, BXLCommonConst._PORT_BLUETOOTH);
+
                             mServiceManager.Write(image.PopAll());
                             mServiceManager.executeCommand("P" + 1 + "," + 1, false);
 
+
                         }
                     }
-
-
 
                     EnableDialog(false, "Enviando terminando...",false);
 
@@ -1285,7 +1242,11 @@ public class MainActivity extends AppCompatActivity implements Runnable, OutputC
             float scaledWidth = width * scale;
             float scaledHeight = height * scale;
             Bitmap bmp = Bitmap.createBitmap((int) scaledWidth, (int) scaledHeight, Bitmap.Config.ARGB_8888);
-            
+
+
+
+
+
             int width2 = (int) scaledWidth;
             int height2 = (int) scaledHeight;
 
